@@ -1,4 +1,7 @@
 package com parcelflow.model;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
 
 public class Shipment { //for our shipment objects that will be delivered 
     //we make them private since we dont want them to be accessed by any other class and change it to an invalid number
@@ -24,6 +27,14 @@ public class Shipment { //for our shipment objects that will be delivered
         this.sender = sender;
         this.receiver = receiver;
         this.trackingHistory = new ArrayList<>();
+        this.trackingHistory.add(
+            new TrackingEvent(
+                null,
+                ShipmentStatus.CREATED,
+                "Shipment created",
+                LocalDateTime.now()
+            )
+        );
         //currentHub and assignedAgent aren't in the constructor because at the moment of creating a Shipment object
         //it hasn't been assigned a hub or delivery agent 
     }
@@ -53,6 +64,19 @@ public class Shipment { //for our shipment objects that will be delivered
     }
     public List<TrackingEvent> getTrackingHistory(){
         return trackingHistory;
+    }
+
+    public void changeStatus(ShipmentStatus newStatus, String description){
+        if (!status.canTransitionTo(newStatus)){
+            throw new IllegalStateException(
+                "Cannot change shipment status from "+status+" to "+newStatus
+            );
+        }
+        this.status = newStatus;
+        TrackingEvent event = new TrackingEvent(
+            null, newStatus, description, LocalDateTime.now()
+        );
+        trackingHistory.add(event);
     }
 
 
