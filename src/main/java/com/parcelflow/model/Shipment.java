@@ -1,4 +1,4 @@
-package com parcelflow.model;
+package com.parcelflow.model;
 import java.util.List;
 import java.util.ArrayList;
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package.com.parcelflow.model;
+package com.parcelflow.model;
 
 public class Hub {
     private Long id;

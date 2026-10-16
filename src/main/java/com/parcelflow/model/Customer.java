@@ -1,4 +1,4 @@
-package com.parcel.model; 
+package com.parcelflow.model; 
 
 public class Customer { //for the customer objects which will send and receive shipments 
     private Long id;
