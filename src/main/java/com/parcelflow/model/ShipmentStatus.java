@@ -5,6 +5,7 @@ public enum ShipmentStatus { //set of possible statuses for each shipment
     PICKED_UP,
     AT_ORIGIN_HUB,
     IN_TRANSIT,
+    AT_DESTINATION_HUB,
     OUT_FOR_DELIVERY,
     DELIVERED,
     CANCELLED
@@ -15,7 +16,8 @@ public enum ShipmentStatus { //set of possible statuses for each shipment
             case CREATED -> nextStatus == PICKED_UP || nextStatus == CANCELLED;
             case PICKED_UP -> nextStatus == AT_ORIGIN_HUB;
             case AT_ORIGIN_HUB -> nextStatus == IN_TRANSIT;
-            case IN_TRANSIT -> nextStatus == OUT_FOR_DELIVERY;
+            case IN_TRANSIT -> nextStatus == AT_DESTINATION_HUB;
+            case AT_DESTINATION_HUB -> nextStatus == OUT_FOR_DELIVERY;
             case OUT_FOR_DELIVERY -> nextStatus == DELIVERED;
             case DELIVERED, CANCELLED -> false;
         };

@@ -15,8 +15,8 @@ public class Shipment { //for our shipment objects that will be delivered
     private Customer receiver;
 
     private Hub currentHub;
-    private DeliveryAgent assignedAgent;
-
+    private DeliveryAgent pickupAgent;
+    private DeliveryAgent deliveryAgent;
     private List<TrackingEvent> trackingHistory; //contains a collection of multiple tracking events 
 
     public Shipment (Long id, String trackingNumber, double weight, Customer sender, Customer receiver){
@@ -59,13 +59,18 @@ public class Shipment { //for our shipment objects that will be delivered
     public Hub getCurrentHub(){
         return currentHub;
     }
-    public DeliveryAgent getAssignedAgent(){
-        return assignedAgent;
+    public DeliveryAgent getPickupAgent() {
+    return pickupAgent;
+    }
+
+    public DeliveryAgent getDeliveryAgent() {
+        return deliveryAgent;
     }
     public List<TrackingEvent> getTrackingHistory(){
         return trackingHistory;
     }
-
+    
+    //method that checks if the status transition is permissible and updates tracking history accordingly 
     public void changeStatus(ShipmentStatus newStatus, String description){
         if (!status.canTransitionTo(newStatus)){
             throw new IllegalStateException(
@@ -77,6 +82,87 @@ public class Shipment { //for our shipment objects that will be delivered
             null, newStatus, description, LocalDateTime.now()
         );
         trackingHistory.add(event);
+    }
+
+    //method for cancellation after being CREATED 
+    public void cancel(String reason) {
+
+        if (this.status != ShipmentStatus.CREATED) {
+            throw new IllegalStateException(
+                "Shipment can only be cancelled while it is CREATED"
+            );
+        }
+
+        this.changeStatus(
+            ShipmentStatus.CANCELLED,
+            "Shipment cancelled: " + reason
+        );
+}
+
+    //method to assign PICKED_UP to a package 
+    public void pickUp(DeliveryAgent agent) {
+
+        if (this.status != ShipmentStatus.CREATED) {
+            throw new IllegalStateException(
+                "Shipment can only be picked up when it is CREATED"
+            );
+        }
+
+        this.changeStatus(
+        ShipmentStatus.PICKED_UP,
+        "Package picked up by " + agent.getName()
+    );
+        this.pickupAgent = agent;
+
+}
+
+
+    //method that changes the shipment status to AT_ORIGIN_HUB or AT_DESTINATION_HUB and allocates the new hub 
+    public void arriveAtHub(Hub hub, ShipmentStatus hubStatus, String description){
+        if (hubStatus != ShipmentStatus.AT_ORIGIN_HUB && hubStatus != ShipmentStatus.AT_DESTINATION_HUB){
+            throw new IllegalArgumentException(
+                "Hub status must be AT_ORIGIN_HUB or AT_DESTINATION_HUB"
+            );
+        }
+        changeStatus(hubStatus, description);
+        this.currentHub = hub;
+
+    }
+
+    //method to handle IN_TRANSIT from origin hub to destination hub 
+    public void startTransit() {
+
+        if (this.status != ShipmentStatus.AT_ORIGIN_HUB) {
+            throw new IllegalStateException(
+                "Shipment can only enter transit from the origin hub"
+            );
+        }
+
+        this.changeStatus(
+            ShipmentStatus.IN_TRANSIT,
+            "Package departed origin hub"
+        );
+}
+
+    //method that checks the current status then updates status to out for delivery and assigns the agent
+    public void assignDeliveryAgent(DeliveryAgent agent){
+        if (this.status != ShipmentStatus.AT_DESTINATION_HUB){
+            throw new IllegalStateException(
+                "Delivery agent can only be assigned when shipment is at destination hub"
+            );
+        }
+        changeStatus(ShipmentStatus.OUT_FOR_DELIVERY, "Shipment assigned to delivery agent "+agent.getName());
+        this.deliveryAgent = agent;
+    }
+
+    //method to mark a package as delivered to the receiver after being out for delivery 
+    public void markDelivered(String description){
+        if (this.status != ShipmentStatus.OUT_FOR_DELIVERY){
+            throw new IllegalStateException(
+                "Shipment can only be delivered when it is out for delivery"
+            );
+        }
+        changeStatus(ShipmentStatus.DELIVERED, description);
     }
 
 
