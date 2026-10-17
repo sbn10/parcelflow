@@ -44,9 +44,9 @@ public class ParcelFlowDemo {
         );
 
         System.out.println("Current status: " + shipment.getStatus());
-
+/* 
         shipment.changeStatus(
-        /*ShipmentStatus.DELIVERED,
+        ShipmentStatus.DELIVERED,
         "Trying to deliver immediately"
     );*/
         System.out.println("\nTracking History:");
